@@ -7,11 +7,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class BootcampUseCase implements IBootcampUseCase {
 
-    //private final BootcampRepository bootcampRepository;
+    private final BootcampRepository bootcampRepository;
 
     @Override
     public Mono<Bootcamp> save(Bootcamp bootcamp) {
-        return null;
+        return bootcampRepository.save(bootcamp);
     }
 
 }
