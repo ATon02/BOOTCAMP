@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 spring:
   application:
     name: "Bootcamp"
@@ -11,6 +11,14 @@ spring:
       path: "/h2"
   profiles:
     include: null
+  r2dbc:
+    url: "r2dbc:postgresql://localhost:5433/bootcamp"
+    username: "aton"
+    password: "aton123"
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
 management:
   endpoints:
     web:

@@ -1,6 +1,7 @@
-package co.com.backend.reactive.r2dbc;
+package co.com.backend.reactive.r2dbc.adapter;
 
 import co.com.backend.reactive.r2dbc.helper.ReactiveAdapterOperations;
+import co.com.backend.reactive.r2dbc.repository.MyReactiveRepository;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 

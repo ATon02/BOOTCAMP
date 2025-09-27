@@ -1,4 +1,4 @@
-package co.com.backend.reactive.r2dbc;
+package co.com.backend.reactive.r2dbc.repository;
 
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
