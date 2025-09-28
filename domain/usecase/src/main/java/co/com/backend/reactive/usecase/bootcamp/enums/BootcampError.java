@@ -14,7 +14,8 @@ public enum BootcampError {
     INVALID_CAPACITY_COUNT("Bootcamp must have between 1 and 4 capacities"),
     DUPLICATE_CAPACITIES("Bootcamp cannot have duplicate capacities"),
     CAPACITY_ALREADY_EXISTS("Capacity already exists in this bootcamp"),
-    CAPACITY_NOT_FOUND("Capacity not found in this bootcamp");
+    CAPACITY_NOT_FOUND("Capacity not found in this bootcamp"),
+    CAPACITIES_REQUIRED("Bootcamp must have at least one capacity");
 
     private final String message;
 

@@ -9,21 +9,25 @@ import co.com.backend.reactive.r2dbc.repository.BootcampCapacityR2dbcRepository;
 
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+
 
 @Repository
 public class BootcampCapacityRepositoryAdapter extends ReactiveAdapterOperations<
-    BootcampCapacity/* change for domain model */,
-    BootcampCapacityEntity/* change for adapter model */,
+    BootcampCapacity,
+    BootcampCapacityEntity,
     Long,
     BootcampCapacityR2dbcRepository
 > implements BootcampCapacityRepository{
     public BootcampCapacityRepositoryAdapter(BootcampCapacityR2dbcRepository repository, ObjectMapper mapper) {
-        /**
-         *  Could be use mapper.mapBuilder if your domain model implement builder pattern
-         *  super(repository, mapper, d -> mapper.mapBuilder(d,ObjectModel.ObjectModelBuilder.class).build());
-         *  Or using mapper.map with the class of the object model
-         */
-        super(repository, mapper, d -> mapper.map(d, BootcampCapacity.class/* change for domain model */));
+        super(repository, mapper, d -> mapper.map(d, BootcampCapacity.class));
     }
+
+    @Override
+    public Mono<BootcampCapacity> save(BootcampCapacity bootcampCapacity) {
+        return super.save(bootcampCapacity);
+    }
+
+
 
 }

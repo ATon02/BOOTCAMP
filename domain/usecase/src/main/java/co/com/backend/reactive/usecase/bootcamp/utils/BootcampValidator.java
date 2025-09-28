@@ -55,10 +55,6 @@ public class BootcampValidator {
     }
 
     private static void validateBasicFields(Bootcamp bootcamp) {
-        if (bootcamp.getId() == null) {
-            throw new IllegalArgumentException(BootcampError.BOOTCAMP_ID_REQUIRED.getMessage());
-        }
-
         if (bootcamp.getName() == null || bootcamp.getName().trim().isEmpty()) {
             throw new IllegalArgumentException(BootcampError.BOOTCAMP_NAME_REQUIRED.getMessage());
         }
