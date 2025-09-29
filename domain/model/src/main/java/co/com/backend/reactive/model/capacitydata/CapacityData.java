@@ -16,5 +16,5 @@ public class CapacityData {
     private Long id;
     private String name;
     private String description;
-    private List<TecnologyData> tecnologies;
+    private List<TecnologyData> technologies;
 }

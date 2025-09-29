@@ -8,6 +8,8 @@ import co.com.backend.reactive.r2dbc.repository.BootcampR2dbcRepository;
 
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 @Repository
 public class BootcampRepositoryAdapter extends ReactiveAdapterOperations<
@@ -23,6 +25,13 @@ public class BootcampRepositoryAdapter extends ReactiveAdapterOperations<
          *  Or using mapper.map with the class of the object model
          */
         super(repository, mapper, d -> mapper.map(d, Bootcamp.class/* change for domain model */));
+    }
+
+    @Override
+    public Flux<Bootcamp> findAllPaginated(int page, int size, String sortBy, String sortDirection) {
+        int offset = page * size;
+        return repository.findAllPaginated(offset, size, sortBy, sortDirection)
+                .map(this::toEntity);
     }
 
 }

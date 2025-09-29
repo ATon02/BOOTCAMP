@@ -1,5 +1,7 @@
 package co.com.backend.reactive.usecase.bootcamp;
 
+import java.util.List;
+
 import co.com.backend.reactive.model.bootcamp.Bootcamp;
 import co.com.backend.reactive.model.bootcamp.gateways.BootcampRepository;
 import co.com.backend.reactive.model.bootcampcapacity.BootcampCapacity;
@@ -7,6 +9,8 @@ import co.com.backend.reactive.model.bootcampcapacity.gateways.BootcampCapacityR
 import co.com.backend.reactive.model.capacitydata.gateways.CapacityDataRepository;
 import co.com.backend.reactive.usecase.bootcamp.enums.BootcampError;
 import co.com.backend.reactive.usecase.bootcamp.utils.BootcampValidator;
+import co.com.backend.reactive.usecase.bootcamp.dto.BootcampCompletedResponse;
+import co.com.backend.reactive.usecase.bootcamp.dto.CapacityDTO;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
@@ -73,5 +77,37 @@ public class BootcampUseCase implements IBootcampUseCase {
                 })
                 .flatMap(bootcampCapacityRepository::save)
                 .then();
+    }
+
+    @Override
+    public Flux<BootcampCompletedResponse> getAllBootcampWithCapacities(int page, int size, String sortBy,
+            String sortDirection) {
+        return bootcampRepository.findAllPaginated(page, size, sortBy, sortDirection)
+                .concatMap(bootcamp -> bootcampCapacityRepository.findCapacitiesIdsByBootcampId(bootcamp.getId())
+                        .collectList()
+                        .flatMap(capacitiesIds -> {
+                            if (capacitiesIds.isEmpty()) {
+                                return Mono.just(BootcampCompletedResponse.builder()
+                                        .id(bootcamp.getId())
+                                        .name(bootcamp.getName())
+                                        .capacities(List.of())
+                                        .build());
+                            }
+
+                            return capacityDataRepository.findByIds(capacitiesIds)
+                                    .onErrorResume(error -> Flux.empty())
+                                    .map(capacityData -> CapacityDTO.builder()
+                                            .id(capacityData.getId())
+                                            .name(capacityData.getName())
+                                            .description(capacityData.getDescription())
+                                            .tecnologies(capacityData.getTechnologies())
+                                            .build())
+                                    .collectList()
+                                    .map(capacities -> BootcampCompletedResponse.builder()
+                                            .id(bootcamp.getId())
+                                            .name(bootcamp.getName())
+                                            .capacities(capacities)
+                                            .build());
+                        }));
     }
 }

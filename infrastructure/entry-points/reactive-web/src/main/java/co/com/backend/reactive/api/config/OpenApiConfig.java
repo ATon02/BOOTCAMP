@@ -20,6 +20,9 @@ import co.com.backend.reactive.api.dtos.request.BootcampRequestDTO;
 import co.com.backend.reactive.api.dtos.response.BootcampResponseDTO;
 import co.com.backend.reactive.api.dtos.response.BaseResponse;
 import co.com.backend.reactive.api.dtos.response.ErrorResponse;
+import co.com.backend.reactive.usecase.bootcamp.dto.BootcampCompletedResponse;
+import co.com.backend.reactive.usecase.bootcamp.dto.CapacityDTO;
+import co.com.backend.reactive.model.tecnologydata.TecnologyData;
 
 import java.util.List;
 
@@ -70,7 +73,28 @@ public class OpenApiConfig {
                             .addProperty("status", new IntegerSchema().format("int32"))
                             .addProperty("message", new StringSchema())
                             .addProperty("path", new StringSchema())
-                            .addProperty("timestamp", new StringSchema().format("date-time")));
+                            .addProperty("timestamp", new StringSchema().format("date-time")))
+                    .addSchemas("TecnologyData", new Schema<TecnologyData>()
+                            .addProperty("id", new Schema<>().type("integer").format("int64"))
+                            .addProperty("name", new StringSchema()))
+                    .addSchemas("CapacityDTO", new Schema<CapacityDTO>()
+                            .addProperty("id", new Schema<>().type("integer").format("int64"))
+                            .addProperty("name", new StringSchema())
+                            .addProperty("description", new StringSchema())
+                            .addProperty("tecnologies", new Schema<>().type("array")
+                                    .items(new Schema<>().$ref("#/components/schemas/TecnologyData"))))
+                    .addSchemas("BootcampCompletedResponse", new Schema<BootcampCompletedResponse>()
+                            .addProperty("id", new Schema<>().type("integer").format("int64"))
+                            .addProperty("name", new StringSchema())
+                            .addProperty("capacities", new Schema<>().type("array")
+                                    .items(new Schema<>().$ref("#/components/schemas/CapacityDTO"))))
+                    .addSchemas("BootcampListResponse", new Schema<BaseResponse<List<BootcampCompletedResponse>>>()
+                            .addProperty("status", new IntegerSchema().format("int32"))
+                            .addProperty("message", new StringSchema())
+                            .addProperty("path", new StringSchema())
+                            .addProperty("timestamp", new StringSchema().format("date-time"))
+                            .addProperty("data", new Schema<>().type("array")
+                                    .items(new Schema<>().$ref("#/components/schemas/BootcampCompletedResponse"))));
 
             PathItem saveBootcampPath = new PathItem()
                     .post(new Operation()
@@ -92,6 +116,42 @@ public class OpenApiConfig {
                                                             .schema(new Schema<>().$ref("#/components/schemas/BootcampSuccessResponse")))))
                                     .addApiResponse("400", new ApiResponse()
                                             .description("Validation error - Invalid bootcamp data or capacity not found")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                            )
+                    )
+                    .get(new Operation()
+                            .operationId("getAllBootcampWithCapacities")
+                            .tags(List.of("Bootcamp"))
+                            .summary("Get all bootcamps with their capacities")
+                            .description("Retrieves a paginated list of all bootcamps along with their associated capacities and technologies")
+                            .addParametersItem(new io.swagger.v3.oas.models.parameters.Parameter()
+                                    .name("page")
+                                    .in("query")
+                                    .description("Page number (0-based)")
+                                    .required(false)
+                                    .schema(new IntegerSchema().format("int32")._default(0)))
+                            .addParametersItem(new io.swagger.v3.oas.models.parameters.Parameter()
+                                    .name("size")
+                                    .in("query")
+                                    .description("Number of items per page")
+                                    .required(false)
+                                    .schema(new IntegerSchema().format("int32")._default(10)))
+                            .addParametersItem(new io.swagger.v3.oas.models.parameters.Parameter()
+                                    .name("sort")
+                                    .in("query")
+                                    .description("Sort criteria in the format: property,direction (e.g., name,asc)")
+                                    .required(false)
+                                    .schema(new StringSchema()._default("name,asc")))
+                            .responses(new ApiResponses()
+                                    .addApiResponse("200", new ApiResponse()
+                                            .description("List of bootcamps retrieved successfully")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/BootcampListResponse")))))
+                                    .addApiResponse("500", new ApiResponse()
+                                            .description("Internal server error")
                                             .content(new Content().addMediaType("application/json",
                                                     new io.swagger.v3.oas.models.media.MediaType()
                                                             .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))

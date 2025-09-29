@@ -10,6 +10,7 @@ import co.com.backend.reactive.r2dbc.repository.BootcampCapacityR2dbcRepository;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 
 @Repository
@@ -28,6 +29,9 @@ public class BootcampCapacityRepositoryAdapter extends ReactiveAdapterOperations
         return super.save(bootcampCapacity);
     }
 
-
+    @Override
+    public Flux<Long> findCapacitiesIdsByBootcampId(Long bootcampId) {
+        return repository.findCapacitiesIdsByBootcampId(bootcampId);
+    }
 
 }
