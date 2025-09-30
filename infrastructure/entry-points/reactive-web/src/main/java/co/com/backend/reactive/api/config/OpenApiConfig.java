@@ -158,7 +158,39 @@ public class OpenApiConfig {
                             )
                     );
 
+            PathItem deleteBootcampPath = new PathItem()
+                    .delete(new Operation()
+                            .operationId("deleteBootcamp")
+                            .tags(List.of("Bootcamp"))
+                            .summary("Delete a bootcamp by ID")
+                            .description("Deletes an existing bootcamp and all its associated capacity relationships")
+                            .addParametersItem(new io.swagger.v3.oas.models.parameters.Parameter()
+                                    .name("id")
+                                    .in("path")
+                                    .description("The ID of the bootcamp to delete")
+                                    .required(true)
+                                    .schema(new Schema<>().type("integer").format("int64")))
+                            .responses(new ApiResponses()
+                                    .addApiResponse("200", new ApiResponse()
+                                            .description("Bootcamp deleted successfully")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/BootcampSuccessResponse")))))
+                                    .addApiResponse("404", new ApiResponse()
+                                            .description("Bootcamp not found")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                                    .addApiResponse("500", new ApiResponse()
+                                            .description("Internal server error")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                            )
+                    );
+
             openApi.path("/api/v1/bootcamp", saveBootcampPath);
+            openApi.path("/api/v1/bootcamp/{id}", deleteBootcampPath);
         };
     }
 }

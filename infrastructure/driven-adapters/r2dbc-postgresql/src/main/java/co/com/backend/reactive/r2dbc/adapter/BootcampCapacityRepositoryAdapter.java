@@ -34,4 +34,19 @@ public class BootcampCapacityRepositoryAdapter extends ReactiveAdapterOperations
         return repository.findCapacitiesIdsByBootcampId(bootcampId);
     }
 
+    @Override
+    public Flux<Long> findBootcampIdsByCapacityId(Long capacityId) {
+        return repository.findBootcampIdsByCapacityId(capacityId);
+    }
+
+    @Override
+    public Mono<Void> deleteByBootcampId(Long bootcampId) {
+        return repository.deleteByBootcampId(bootcampId);
+    }
+
+    @Override
+    public Mono<Long> countBootcampsByCapacityId(Long capacityId) {
+        return repository.countBootcampsByCapacityId(capacityId);
+    }
+
 }

@@ -8,4 +8,7 @@ import reactor.core.publisher.Flux;
 public interface BootcampCapacityRepository {
     Mono<BootcampCapacity> save(BootcampCapacity bootcampCapacity);
     Flux<Long> findCapacitiesIdsByBootcampId(Long bootcampId);
+    Flux<Long> findBootcampIdsByCapacityId(Long capacityId);
+    Mono<Void> deleteByBootcampId(Long bootcampId);
+    Mono<Long> countBootcampsByCapacityId(Long capacityId);
 }

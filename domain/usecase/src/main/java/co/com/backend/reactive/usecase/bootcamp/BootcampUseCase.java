@@ -110,4 +110,38 @@ public class BootcampUseCase implements IBootcampUseCase {
                                             .build());
                         }));
     }
+    
+    @Override
+    public Mono<Void> deleteBootcamp(Long id) {
+        if (id == null || id <= 0) {
+            return Mono.error(new IllegalArgumentException(BootcampError.INVALID_ID.getMessage()));
+        }
+        
+        return bootcampCapacityRepository.findCapacitiesIdsByBootcampId(id)
+                .distinct()
+                .collectList()
+                .flatMap(this::findSingleCapacities)
+                .flatMap(singleCapacityIds -> {
+                    return bootcampCapacityRepository.deleteByBootcampId(id)
+                            .then(Mono.defer(() -> {
+                                if (!singleCapacityIds.isEmpty()) {
+                                    return capacityDataRepository.deleteByIds(singleCapacityIds)
+                                            .then(bootcampRepository.deleteById(id));
+                                } else {
+                                    return bootcampRepository.deleteById(id);
+                                }
+                            }));
+                });
+    }
+
+    private Mono<List<Long>> findSingleCapacities(List<Long> capacityIds) {
+        return Flux.fromIterable(capacityIds)
+                .filterWhen(capacityId -> 
+                    bootcampCapacityRepository.countBootcampsByCapacityId(capacityId)
+                            .map(count -> count == 1)
+                )
+                .collectList();
+    }
+
 }
+

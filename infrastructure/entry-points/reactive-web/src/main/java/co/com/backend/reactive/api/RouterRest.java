@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -14,6 +15,7 @@ public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/bootcamp"), handler::createBootcamp)
-                .andRoute(GET("/api/v1/bootcamp"), handler::getAllBootcampWithCapacities);
+                .andRoute(GET("/api/v1/bootcamp"), handler::getAllBootcampWithCapacities)
+                .andRoute(DELETE("/api/v1/bootcamp/{id}"), handler::deleteBootcamp);
     }
 }

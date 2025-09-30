@@ -9,4 +9,5 @@ public interface CapacityDataRepository {
     Mono<CapacityData> findById(Long id);
     Mono<Boolean> existsById(Long id);
     Flux<CapacityData> findByIds(List<Long> ids);
+    Mono<Void> deleteByIds(List<Long> ids);
 }

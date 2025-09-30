@@ -65,4 +65,27 @@ public class CapacityIntercomAdapter implements CapacityDataRepository {
                 .onErrorResume(e -> Flux.fromIterable(ids).flatMap(this::findById));
     }
 
+    @Override
+    public Mono<Void> deleteByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Mono.empty();
+        }
+        
+        String idsParam = ids.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        
+        return webClient.delete()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/capacity")
+                                             .queryParam("ids", idsParam)
+                                             .build())
+                .retrieve()
+                .bodyToMono(CapacityIntercomResponse.class)
+                .filter(response -> response.getStatus() == 200)
+                .then()
+                .onErrorResume(e -> {
+                    return Mono.error(new RuntimeException("Failed to delete capacities: " + e.getMessage(), e));
+                });
+    }
+
 }

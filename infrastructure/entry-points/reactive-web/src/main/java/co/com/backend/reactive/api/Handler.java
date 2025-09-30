@@ -72,4 +72,22 @@ public class Handler {
                             .bodyValue(body);
                 });
     }
+
+    public Mono<ServerResponse> deleteBootcamp(ServerRequest serverRequest) {
+        String path = serverRequest.path();
+        String idBootcamp = serverRequest.pathVariable("id");
+        return bootcampUseCase.deleteBootcamp(Long.valueOf(idBootcamp))
+                .then(Mono.defer(() -> {
+                    BaseResponse<Void> body = BaseResponse.<Void>builder()
+                            .status(200)
+                            .message("Bootcamp deleted successfully")
+                            .path(path)
+                            .timestamp(LocalDateTime.now())
+                            .data(null)
+                            .build();
+                    return ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(body);
+                }));
+    }
 }
