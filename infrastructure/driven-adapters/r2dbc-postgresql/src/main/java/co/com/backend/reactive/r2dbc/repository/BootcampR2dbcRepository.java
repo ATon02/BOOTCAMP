@@ -1,5 +1,7 @@
 package co.com.backend.reactive.r2dbc.repository;
 
+import java.util.List;
+
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
@@ -29,5 +31,8 @@ public interface BootcampR2dbcRepository extends ReactiveCrudRepository<Bootcamp
                                         @Param("size") int size,
                                         @Param("sortBy") String sortBy,
                                         @Param("sortDirection") String sortDirection);
+
+    @Query("SELECT * FROM bootcamps WHERE id IN (:ids)")
+    Flux<BootcampEntity> findByIds(@Param("ids") List<Long> ids);
 }
 

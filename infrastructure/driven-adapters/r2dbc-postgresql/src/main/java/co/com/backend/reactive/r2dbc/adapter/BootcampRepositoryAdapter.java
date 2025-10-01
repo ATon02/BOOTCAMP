@@ -1,5 +1,7 @@
 package co.com.backend.reactive.r2dbc.adapter;
 
+import java.util.List;
+
 import co.com.backend.reactive.model.bootcamp.Bootcamp;
 import co.com.backend.reactive.model.bootcamp.gateways.BootcampRepository;
 import co.com.backend.reactive.r2dbc.entiry.BootcampEntity;
@@ -37,6 +39,12 @@ public class BootcampRepositoryAdapter extends ReactiveAdapterOperations<
     @Override
     public Mono<Void> deleteById(Long id) {
         return repository.deleteById(id);
+    }
+
+    @Override
+    public Flux<Bootcamp> findByIds(List<Long> ids) {
+        return repository.findByIds(ids)
+                .map(this::toEntity);
     }
 
 }

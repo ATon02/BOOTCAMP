@@ -86,6 +86,9 @@ public class OpenApiConfig {
                     .addSchemas("BootcampCompletedResponse", new Schema<BootcampCompletedResponse>()
                             .addProperty("id", new Schema<>().type("integer").format("int64"))
                             .addProperty("name", new StringSchema())
+                            .addProperty("description", new StringSchema())
+                            .addProperty("startDate", new StringSchema().format("date"))
+                            .addProperty("durationInDays", new Schema<>().type("integer").format("int64"))
                             .addProperty("capacities", new Schema<>().type("array")
                                     .items(new Schema<>().$ref("#/components/schemas/CapacityDTO"))))
                     .addSchemas("BootcampListResponse", new Schema<BaseResponse<List<BootcampCompletedResponse>>>()
@@ -158,7 +161,72 @@ public class OpenApiConfig {
                             )
                     );
 
-            PathItem deleteBootcampPath = new PathItem()
+            PathItem getBootcampBatchPath = new PathItem()
+                    .get(new Operation()
+                            .operationId("getBootcampWithCapacitiesByIds")
+                            .tags(List.of("Bootcamp"))
+                            .summary("Get bootcamps by IDs with their capacities")
+                            .description("Retrieves a list of bootcamps by their IDs along with their associated capacities and technologies")
+                            .addParametersItem(new io.swagger.v3.oas.models.parameters.Parameter()
+                                    .name("ids")
+                                    .in("query")
+                                    .description("Comma-separated list of bootcamp IDs")
+                                    .required(true)
+                                    .schema(new StringSchema().example("1,2,3")))
+                            .responses(new ApiResponses()
+                                    .addApiResponse("200", new ApiResponse()
+                                            .description("Bootcamps retrieved successfully")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/BootcampListResponse")))))
+                                    .addApiResponse("400", new ApiResponse()
+                                            .description("Invalid IDs parameter")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                                    .addApiResponse("500", new ApiResponse()
+                                            .description("Internal server error")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                            )
+                    );
+
+            PathItem bootcampByIdPath = new PathItem()
+                    .get(new Operation()
+                            .operationId("getBootcampById")
+                            .tags(List.of("Bootcamp"))
+                            .summary("Get a bootcamp by ID")
+                            .description("Retrieves a single bootcamp by its ID")
+                            .addParametersItem(new io.swagger.v3.oas.models.parameters.Parameter()
+                                    .name("id")
+                                    .in("path")
+                                    .description("The ID of the bootcamp to retrieve")
+                                    .required(true)
+                                    .schema(new Schema<>().type("integer").format("int64")))
+                            .responses(new ApiResponses()
+                                    .addApiResponse("200", new ApiResponse()
+                                            .description("Bootcamp found successfully")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/BootcampSuccessResponse")))))
+                                    .addApiResponse("400", new ApiResponse()
+                                            .description("Invalid bootcamp ID")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                                    .addApiResponse("404", new ApiResponse()
+                                            .description("Bootcamp not found")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                                    .addApiResponse("500", new ApiResponse()
+                                            .description("Internal server error")
+                                            .content(new Content().addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))))
+                            )
+                    )
                     .delete(new Operation()
                             .operationId("deleteBootcamp")
                             .tags(List.of("Bootcamp"))
@@ -190,7 +258,8 @@ public class OpenApiConfig {
                     );
 
             openApi.path("/api/v1/bootcamp", saveBootcampPath);
-            openApi.path("/api/v1/bootcamp/{id}", deleteBootcampPath);
+            openApi.path("/api/v1/bootcamp/batch", getBootcampBatchPath);
+            openApi.path("/api/v1/bootcamp/{id}", bootcampByIdPath);
         };
     }
 }

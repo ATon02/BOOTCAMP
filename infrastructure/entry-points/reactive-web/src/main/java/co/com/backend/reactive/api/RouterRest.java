@@ -16,6 +16,8 @@ public class RouterRest {
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/bootcamp"), handler::createBootcamp)
                 .andRoute(GET("/api/v1/bootcamp"), handler::getAllBootcampWithCapacities)
+                .andRoute(GET("/api/v1/bootcamp/batch"), handler::getBootcampWithCapacitiesByIds)
+                .andRoute(GET("/api/v1/bootcamp/{id}"), handler::getBootcampById)
                 .andRoute(DELETE("/api/v1/bootcamp/{id}"), handler::deleteBootcamp);
     }
 }

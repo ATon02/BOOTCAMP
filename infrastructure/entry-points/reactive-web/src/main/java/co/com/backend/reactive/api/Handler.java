@@ -3,7 +3,9 @@ package co.com.backend.reactive.api;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -89,5 +91,59 @@ public class Handler {
                             .contentType(MediaType.APPLICATION_JSON)
                             .bodyValue(body);
                 }));
+    }
+
+    public Mono<ServerResponse> getBootcampWithCapacitiesByIds(ServerRequest serverRequest) {
+        String path = serverRequest.path();
+        String idsParam = serverRequest.queryParam("ids").orElse("");
+        return Mono.fromCallable(() -> {
+                    if (idsParam.isEmpty()) {
+                        throw new IllegalArgumentException("IDs parameter is required");
+                    }
+                    return Arrays.stream(idsParam.split(","))
+                            .map(String::trim)
+                            .map(Long::parseLong)
+                            .collect(Collectors.toList());
+                })
+                .onErrorMap(NumberFormatException.class,
+                    ex -> new IllegalArgumentException("Invalid ID format in parameters"))
+                .flatMapMany(bootcampUseCase::getBootcampWithCapacitiesByIds)
+                .collectList()
+                .flatMap(response -> {
+                    BaseResponse<List<BootcampCompletedResponse>> body =
+                            BaseResponse.<List<BootcampCompletedResponse>>builder()
+                            .status(200)
+                            .message("Bootcamps retrieved successfully")
+                            .path(path)
+                            .timestamp(LocalDateTime.now())
+                            .data(response)
+                            .build();
+                    return ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(body);
+                });
+    }
+
+    public Mono<ServerResponse> getBootcampById(ServerRequest serverRequest) {
+        String path = serverRequest.path();
+        String idBootcamp = serverRequest.pathVariable("id");
+
+        return Mono.fromCallable(() -> Long.parseLong(idBootcamp))
+                .onErrorMap(NumberFormatException.class,
+                    ex -> new IllegalArgumentException("Invalid bootcamp ID format"))
+                .flatMap(bootcampUseCase::getBootcampById)
+                .map(bootcampDTOMapper::toResponseDTO)
+                .flatMap(bootcamp -> {
+                    BaseResponse<BootcampResponseDTO> body = BaseResponse.<BootcampResponseDTO>builder()
+                            .status(200)
+                            .message("Bootcamp found successfully")
+                            .path(serverRequest.path())
+                            .timestamp(LocalDateTime.now())
+                            .data(bootcamp)
+                            .build();
+                    return ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(body);
+                });
     }
 }

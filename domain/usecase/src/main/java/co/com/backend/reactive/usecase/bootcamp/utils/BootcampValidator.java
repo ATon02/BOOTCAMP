@@ -3,7 +3,7 @@ package co.com.backend.reactive.usecase.bootcamp.utils;
 import reactor.core.publisher.Mono;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Date;
+import java.time.LocalDate;
 
 import co.com.backend.reactive.model.bootcamp.Bootcamp;
 import co.com.backend.reactive.usecase.bootcamp.enums.BootcampError;
@@ -67,8 +67,8 @@ public class BootcampValidator {
             throw new IllegalArgumentException(BootcampError.BOOTCAMP_START_DATE_REQUIRED.getMessage());
         }
 
-        Date currentDate = new Date();
-        if (bootcamp.getStartDate().before(currentDate)) {
+        LocalDate currentDate = LocalDate.now();
+        if (bootcamp.getStartDate().isBefore(currentDate)) {
             throw new IllegalArgumentException(BootcampError.BOOTCAMP_START_DATE_INVALID.getMessage());
         }
 

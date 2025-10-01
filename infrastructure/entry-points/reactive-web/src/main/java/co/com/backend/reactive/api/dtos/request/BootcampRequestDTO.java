@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +17,7 @@ import java.util.Set;
 public class BootcampRequestDTO {
     private String name;
     private String description;
-    private Date startDate;
+    private LocalDate  startDate;
     private Long durationInDays;
     private Set<Long> capacities;
 }

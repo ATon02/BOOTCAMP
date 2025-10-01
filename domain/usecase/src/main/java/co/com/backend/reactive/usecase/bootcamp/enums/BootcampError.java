@@ -4,6 +4,7 @@ public enum BootcampError {
 
     BOOTCAMP_ID_REQUIRED("Bootcamp ID is required"),
     INVALID_ID("Invalid ID provided"),
+    BOOTCAMP_NOT_FOUND("Bootcamp not found"),
     BOOTCAMP_NAME_REQUIRED("Bootcamp name is required"),
     BOOTCAMP_DESCRIPTION_REQUIRED("Bootcamp description is required"),
     BOOTCAMP_START_DATE_REQUIRED("Bootcamp start date is required"),

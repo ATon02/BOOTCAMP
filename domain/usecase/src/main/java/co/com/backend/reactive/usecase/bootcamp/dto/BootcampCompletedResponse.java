@@ -1,6 +1,6 @@
 package co.com.backend.reactive.usecase.bootcamp.dto;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import co.com.backend.reactive.usecase.bootcamp.dto.CapacityDTO;
@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 public class BootcampCompletedResponse {
     private Long id;
     private String name;
+    private String description;
+    private LocalDate startDate;
+    private Long durationInDays;
     private List<CapacityDTO> capacities;
-
 }

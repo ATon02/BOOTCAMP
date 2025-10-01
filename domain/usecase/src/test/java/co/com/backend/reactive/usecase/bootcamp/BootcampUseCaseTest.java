@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +56,7 @@ class BootcampUseCaseTest {
         capacityIds.add(1L);
         capacityIds.add(2L);
         
-        Date futureDate = new Date(System.currentTimeMillis() + 86400000);
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         
         testBootcamp = Bootcamp.builder()
                 .name("Java Bootcamp")
@@ -98,7 +98,7 @@ class BootcampUseCaseTest {
 
     @Test
     void save_ShouldThrowException_WhenCapacitiesAreNull() {
-        Date futureDate = new Date(System.currentTimeMillis() + 86400000);
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         Bootcamp bootcampWithoutCapacities = Bootcamp.builder()
                 .name("Java Bootcamp")
                 .description("Intensive Java training program")
@@ -117,7 +117,7 @@ class BootcampUseCaseTest {
 
     @Test
     void save_ShouldThrowException_WhenCapacitiesAreEmpty() {
-        Date futureDate = new Date(System.currentTimeMillis() + 86400000);
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         Bootcamp bootcampWithEmptyCapacities = Bootcamp.builder()
                 .name("Java Bootcamp")
                 .description("Intensive Java training program")
@@ -153,7 +153,7 @@ class BootcampUseCaseTest {
         Bootcamp invalidBootcamp = Bootcamp.builder()
                 .name("")
                 .description("Intensive Java training program")
-                .startDate(new Date(System.currentTimeMillis() + 86400000))
+                .startDate(LocalDate.now().plusDays(1))
                 .durationInDays(60L)
                 .capacities(capacityIds)
                 .build();

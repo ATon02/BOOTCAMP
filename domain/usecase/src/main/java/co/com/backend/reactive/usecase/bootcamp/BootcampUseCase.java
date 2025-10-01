@@ -90,6 +90,9 @@ public class BootcampUseCase implements IBootcampUseCase {
                                 return Mono.just(BootcampCompletedResponse.builder()
                                         .id(bootcamp.getId())
                                         .name(bootcamp.getName())
+                                        .description(bootcamp.getDescription())
+                                        .startDate(bootcamp.getStartDate())
+                                        .durationInDays(bootcamp.getDurationInDays())
                                         .capacities(List.of())
                                         .build());
                             }
@@ -106,6 +109,9 @@ public class BootcampUseCase implements IBootcampUseCase {
                                     .map(capacities -> BootcampCompletedResponse.builder()
                                             .id(bootcamp.getId())
                                             .name(bootcamp.getName())
+                                            .description(bootcamp.getDescription())
+                                            .startDate(bootcamp.getStartDate())
+                                            .durationInDays(bootcamp.getDurationInDays())
                                             .capacities(capacities)
                                             .build());
                         }));
@@ -143,5 +149,51 @@ public class BootcampUseCase implements IBootcampUseCase {
                 .collectList();
     }
 
+    @Override
+    public Flux<BootcampCompletedResponse> getBootcampWithCapacitiesByIds(List<Long> ids){
+        return bootcampRepository.findByIds(ids)
+                .concatMap(bootcamp -> bootcampCapacityRepository.findCapacitiesIdsByBootcampId(bootcamp.getId())
+                        .collectList()
+                        .flatMap(capacitiesIds -> {
+                            if (capacitiesIds.isEmpty()) {
+                                return Mono.just(BootcampCompletedResponse.builder()
+                                        .id(bootcamp.getId())
+                                        .name(bootcamp.getName())
+                                        .description(bootcamp.getDescription())
+                                        .startDate(bootcamp.getStartDate())
+                                        .durationInDays(bootcamp.getDurationInDays())
+                                        .capacities(List.of())
+                                        .build());
+                            }
+
+                            return capacityDataRepository.findByIds(capacitiesIds)
+                                    .onErrorResume(error -> Flux.empty())
+                                    .map(capacityData -> CapacityDTO.builder()
+                                            .id(capacityData.getId())
+                                            .name(capacityData.getName())
+                                            .description(capacityData.getDescription())
+                                            .tecnologies(capacityData.getTechnologies())
+                                            .build())
+                                    .collectList()
+                                    .map(capacities -> BootcampCompletedResponse.builder()
+                                            .id(bootcamp.getId())
+                                            .name(bootcamp.getName())
+                                            .description(bootcamp.getDescription())
+                                            .startDate(bootcamp.getStartDate())
+                                            .durationInDays(bootcamp.getDurationInDays())
+                                            .capacities(capacities)
+                                            .build());
+                        }));
+    }
+
+
+    @Override
+    public Mono<Bootcamp> getBootcampById(Long id) {
+        if (id == null || id <= 0) {
+            return Mono.error(new IllegalArgumentException(BootcampError.INVALID_ID.getMessage()));
+        }
+        return bootcampRepository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException(BootcampError.BOOTCAMP_NOT_FOUND.getMessage() + " " + id)));
+    }
 }
 

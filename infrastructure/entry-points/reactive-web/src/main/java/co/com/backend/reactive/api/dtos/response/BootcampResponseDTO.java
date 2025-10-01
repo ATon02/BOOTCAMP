@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.Set;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -15,7 +16,7 @@ public class BootcampResponseDTO {
     private Long id;
     private String name;
     private String description;
-    private Date startDate;
+    private LocalDate  startDate;
     private Long durationInDays;
     private Set<Long> capacities;
 }
