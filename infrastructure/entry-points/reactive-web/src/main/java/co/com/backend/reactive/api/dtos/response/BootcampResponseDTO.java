@@ -7,11 +7,13 @@ import lombok.NoArgsConstructor;
 import java.util.Set;
 import java.time.LocalDate;
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BootcampResponseDTO {
     private Long id;
     private String name;

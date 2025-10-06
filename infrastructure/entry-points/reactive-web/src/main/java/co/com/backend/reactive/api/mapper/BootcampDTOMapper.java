@@ -5,8 +5,9 @@ import co.com.backend.reactive.api.dtos.request.BootcampRequestDTO;
 import co.com.backend.reactive.api.dtos.response.BootcampResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BootcampDTOMapper {
 
     Bootcamp toModel(BootcampRequestDTO requestDTO);

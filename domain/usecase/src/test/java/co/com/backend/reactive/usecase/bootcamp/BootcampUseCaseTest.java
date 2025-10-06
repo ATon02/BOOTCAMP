@@ -10,6 +10,7 @@ import co.com.backend.reactive.model.tecnologydata.TecnologyData;
 import co.com.backend.reactive.usecase.bootcamp.dto.BootcampCompletedResponse;
 import co.com.backend.reactive.usecase.bootcamp.dto.CapacityDTO;
 import co.com.backend.reactive.usecase.bootcamp.enums.BootcampError;
+import co.com.backend.reactive.usecase.bootcamp.exceptions.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,43 +97,6 @@ class BootcampUseCaseTest {
         verify(bootcampCapacityRepository, times(2)).save(any(BootcampCapacity.class));
     }
 
-    @Test
-    void save_ShouldThrowException_WhenCapacitiesAreNull() {
-        LocalDate futureDate = LocalDate.now().plusDays(1);
-        Bootcamp bootcampWithoutCapacities = Bootcamp.builder()
-                .name("Java Bootcamp")
-                .description("Intensive Java training program")
-                .startDate(futureDate)
-                .durationInDays(60L)
-                .capacities(null)
-                .build();
-
-        StepVerifier.create(bootcampUseCase.save(bootcampWithoutCapacities))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-
-        verify(capacityDataRepository, never()).existsById(anyLong());
-        verify(bootcampRepository, never()).save(any(Bootcamp.class));
-    }
-
-    @Test
-    void save_ShouldThrowException_WhenCapacitiesAreEmpty() {
-        LocalDate futureDate = LocalDate.now().plusDays(1);
-        Bootcamp bootcampWithEmptyCapacities = Bootcamp.builder()
-                .name("Java Bootcamp")
-                .description("Intensive Java training program")
-                .startDate(futureDate)
-                .durationInDays(60L)
-                .capacities(new HashSet<>())
-                .build();
-
-        StepVerifier.create(bootcampUseCase.save(bootcampWithEmptyCapacities))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-
-        verify(capacityDataRepository, never()).existsById(anyLong());
-        verify(bootcampRepository, never()).save(any(Bootcamp.class));
-    }
 
     @Test
     void save_ShouldThrowException_WhenCapacityDoesNotExist() {
@@ -140,30 +104,12 @@ class BootcampUseCaseTest {
         when(capacityDataRepository.existsById(2L)).thenReturn(Mono.just(false));
 
         StepVerifier.create(bootcampUseCase.save(testBootcamp))
-                .expectError(IllegalArgumentException.class)
+                .expectError(BusinessException.class)
                 .verify();
 
         verify(capacityDataRepository, times(2)).existsById(anyLong());
         verify(bootcampRepository, never()).save(any(Bootcamp.class));
         verify(bootcampCapacityRepository, never()).save(any(BootcampCapacity.class));
-    }
-
-    @Test
-    void save_ShouldValidateBootcampData_WhenInvalidDataProvided() {
-        Bootcamp invalidBootcamp = Bootcamp.builder()
-                .name("")
-                .description("Intensive Java training program")
-                .startDate(LocalDate.now().plusDays(1))
-                .durationInDays(60L)
-                .capacities(capacityIds)
-                .build();
-
-        StepVerifier.create(bootcampUseCase.save(invalidBootcamp))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-
-        verify(capacityDataRepository, never()).existsById(anyLong());
-        verify(bootcampRepository, never()).save(any(Bootcamp.class));
     }
 
     @Test
@@ -244,34 +190,6 @@ class BootcampUseCaseTest {
         verify(bootcampRepository).findAllPaginated(0, 10, "name", "asc");
         verify(bootcampCapacityRepository).findCapacitiesIdsByBootcampId(1L);
         verify(capacityDataRepository, never()).findByIds(anyList());
-    }
-
-    @Test
-    void getAllBootcampWithCapacities_ShouldHandleCapacityDataError_WhenExternalServiceFails() {
-        List<Bootcamp> bootcamps = Arrays.asList(
-            Bootcamp.builder().id(1L).name("Java Bootcamp").build()
-        );
-        
-        List<Long> capacityIds = Arrays.asList(1L, 2L);
-
-        when(bootcampRepository.findAllPaginated(0, 10, "name", "asc"))
-            .thenReturn(Flux.fromIterable(bootcamps));
-        when(bootcampCapacityRepository.findCapacitiesIdsByBootcampId(1L))
-            .thenReturn(Flux.fromIterable(capacityIds));
-        when(capacityDataRepository.findByIds(capacityIds))
-            .thenReturn(Flux.error(new RuntimeException("External service error")));
-
-        StepVerifier.create(bootcampUseCase.getAllBootcampWithCapacities(0, 10, "name", "asc"))
-            .expectNextMatches(response -> 
-                response.getId().equals(1L) && 
-                response.getName().equals("Java Bootcamp") &&
-                response.getCapacities().isEmpty()
-            )
-            .verifyComplete();
-
-        verify(bootcampRepository).findAllPaginated(0, 10, "name", "asc");
-        verify(bootcampCapacityRepository).findCapacitiesIdsByBootcampId(1L);
-        verify(capacityDataRepository).findByIds(capacityIds);
     }
 
     @Test

@@ -8,7 +8,7 @@ import co.com.backend.reactive.model.bootcampcapacity.BootcampCapacity;
 import co.com.backend.reactive.model.bootcampcapacity.gateways.BootcampCapacityRepository;
 import co.com.backend.reactive.model.capacitydata.gateways.CapacityDataRepository;
 import co.com.backend.reactive.usecase.bootcamp.enums.BootcampError;
-import co.com.backend.reactive.usecase.bootcamp.utils.BootcampValidator;
+import co.com.backend.reactive.usecase.bootcamp.exceptions.BusinessException;
 import co.com.backend.reactive.usecase.bootcamp.dto.BootcampCompletedResponse;
 import co.com.backend.reactive.usecase.bootcamp.dto.CapacityDTO;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +23,11 @@ public class BootcampUseCase implements IBootcampUseCase {
 
     @Override
     public Mono<Bootcamp> save(Bootcamp bootcamp) {
-        return BootcampValidator.validateForSave(bootcamp)
-                .flatMap(validatedBootcamp -> validateAndCheckCapacities(validatedBootcamp))
+        return  validateAndCheckCapacities(bootcamp)
                 .flatMap(this::saveBootcampWithCapacities);
     }
 
     private Mono<Bootcamp> validateAndCheckCapacities(Bootcamp bootcamp) {
-        if (bootcamp.getCapacities() == null || bootcamp.getCapacities().isEmpty()) {
-            return Mono.error(new IllegalArgumentException(BootcampError.CAPACITIES_REQUIRED.getMessage()));
-        }
-        
         return Flux.fromIterable(bootcamp.getCapacities())
                 .flatMap(this::validateCapacityExists)
                 .collectList()
@@ -43,7 +38,7 @@ public class BootcampUseCase implements IBootcampUseCase {
         return capacityDataRepository.existsById(capacityId)
                 .flatMap(exists -> {
                     if (!exists) {
-                        return Mono.error(new IllegalArgumentException(
+                        return Mono.error(new BusinessException(
                                 BootcampError.CAPACITY_NOT_FOUND.getMessage() + " " + capacityId));
                     }
                     return Mono.just(capacityId);
@@ -119,10 +114,6 @@ public class BootcampUseCase implements IBootcampUseCase {
     
     @Override
     public Mono<Void> deleteBootcamp(Long id) {
-        if (id == null || id <= 0) {
-            return Mono.error(new IllegalArgumentException(BootcampError.INVALID_ID.getMessage()));
-        }
-        
         return bootcampCapacityRepository.findCapacitiesIdsByBootcampId(id)
                 .distinct()
                 .collectList()
@@ -189,11 +180,8 @@ public class BootcampUseCase implements IBootcampUseCase {
 
     @Override
     public Mono<Bootcamp> getBootcampById(Long id) {
-        if (id == null || id <= 0) {
-            return Mono.error(new IllegalArgumentException(BootcampError.INVALID_ID.getMessage()));
-        }
         return bootcampRepository.findById(id)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException(BootcampError.BOOTCAMP_NOT_FOUND.getMessage() + " " + id)));
+                .switchIfEmpty(Mono.error(new BusinessException(BootcampError.BOOTCAMP_NOT_FOUND.getMessage() + " " + id)));
     }
 }
 
