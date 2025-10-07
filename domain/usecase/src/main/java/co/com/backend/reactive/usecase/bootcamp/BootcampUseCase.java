@@ -7,6 +7,8 @@ import co.com.backend.reactive.model.bootcamp.gateways.BootcampRepository;
 import co.com.backend.reactive.model.bootcampcapacity.BootcampCapacity;
 import co.com.backend.reactive.model.bootcampcapacity.gateways.BootcampCapacityRepository;
 import co.com.backend.reactive.model.capacitydata.gateways.CapacityDataRepository;
+import co.com.backend.reactive.model.datatosend.DataToSend;
+import co.com.backend.reactive.model.datatosend.gateways.DataToSendRepository;
 import co.com.backend.reactive.usecase.bootcamp.enums.BootcampError;
 import co.com.backend.reactive.usecase.bootcamp.exceptions.BusinessException;
 import co.com.backend.reactive.usecase.bootcamp.dto.BootcampCompletedResponse;
@@ -20,11 +22,19 @@ public class BootcampUseCase implements IBootcampUseCase {
     private final BootcampRepository bootcampRepository;
     private final BootcampCapacityRepository bootcampCapacityRepository;
     private final CapacityDataRepository capacityDataRepository;
+    private final DataToSendRepository dataToSendRepository;
 
     @Override
     public Mono<Bootcamp> save(Bootcamp bootcamp) {
-        return  validateAndCheckCapacities(bootcamp)
-                .flatMap(this::saveBootcampWithCapacities);
+        return validateAndCheckCapacities(bootcamp)
+                .flatMap(this::saveBootcampWithCapacities)
+                .flatMap(savedBootcamp -> {
+                    DataToSend data = DataToSend.builder()
+                            .bootcampId(savedBootcamp.getId())
+                            .build();
+                    return dataToSendRepository.sendDataToSqs(data)
+                            .thenReturn(savedBootcamp);
+                });
     }
 
     private Mono<Bootcamp> validateAndCheckCapacities(Bootcamp bootcamp) {
@@ -179,9 +189,41 @@ public class BootcampUseCase implements IBootcampUseCase {
 
 
     @Override
-    public Mono<Bootcamp> getBootcampById(Long id) {
+    public Mono<BootcampCompletedResponse> getBootcampById(Long id) {
         return bootcampRepository.findById(id)
-                .switchIfEmpty(Mono.error(new BusinessException(BootcampError.BOOTCAMP_NOT_FOUND.getMessage() + " " + id)));
+                .switchIfEmpty(Mono.error(new BusinessException(BootcampError.BOOTCAMP_NOT_FOUND.getMessage() + " " + id)))
+                .flatMap(bootcamp -> bootcampCapacityRepository.findCapacitiesIdsByBootcampId(bootcamp.getId())
+                        .collectList()
+                        .flatMap(capacitiesIds -> {
+                            if (capacitiesIds.isEmpty()) {
+                                return Mono.just(BootcampCompletedResponse.builder()
+                                        .id(bootcamp.getId())
+                                        .name(bootcamp.getName())
+                                        .description(bootcamp.getDescription())
+                                        .startDate(bootcamp.getStartDate())
+                                        .durationInDays(bootcamp.getDurationInDays())
+                                        .capacities(List.of())
+                                        .build());
+                            }
+
+                            return capacityDataRepository.findByIds(capacitiesIds)
+                                    .onErrorResume(error -> Flux.empty())
+                                    .map(capacityData -> CapacityDTO.builder()
+                                            .id(capacityData.getId())
+                                            .name(capacityData.getName())
+                                            .description(capacityData.getDescription())
+                                            .tecnologies(capacityData.getTechnologies())
+                                            .build())
+                                    .collectList()
+                                    .map(capacities -> BootcampCompletedResponse.builder()
+                                            .id(bootcamp.getId())
+                                            .name(bootcamp.getName())
+                                            .description(bootcamp.getDescription())
+                                            .startDate(bootcamp.getStartDate())
+                                            .durationInDays(bootcamp.getDurationInDays())
+                                            .capacities(capacities)
+                                            .build());
+                        }));
     }
 }
 

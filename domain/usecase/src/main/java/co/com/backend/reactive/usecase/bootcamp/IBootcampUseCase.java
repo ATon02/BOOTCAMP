@@ -12,7 +12,7 @@ public interface IBootcampUseCase {
     Flux<BootcampCompletedResponse> getAllBootcampWithCapacities(int page, int size, String sortBy, String sortDirection);
     Mono<Void> deleteBootcamp(Long id);
     Flux<BootcampCompletedResponse> getBootcampWithCapacitiesByIds(List<Long> ids);
-    Mono<Bootcamp> getBootcampById(Long id);
+    Mono<BootcampCompletedResponse> getBootcampById(Long id);
 
     
 }

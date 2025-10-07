@@ -209,7 +209,7 @@ public class OpenApiConfig {
                                             .description("Bootcamp found successfully")
                                             .content(new Content().addMediaType("application/json",
                                                     new io.swagger.v3.oas.models.media.MediaType()
-                                                            .schema(new Schema<>().$ref("#/components/schemas/BootcampSuccessResponse")))))
+                                                            .schema(new Schema<>().$ref("#/components/schemas/BootcampCompletedResponse")))))
                                     .addApiResponse("400", new ApiResponse()
                                             .description("Invalid bootcamp ID")
                                             .content(new Content().addMediaType("application/json",

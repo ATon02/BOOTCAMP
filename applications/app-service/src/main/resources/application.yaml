@@ -17,8 +17,8 @@ spring:
     password: "aton123"
   sql:
     init:
-      mode: always
-      schema-locations: classpath:schema.sql
+      mode: "always"
+      schema-locations: "classpath:schema.sql"
 management:
   endpoints:
     web:
@@ -30,3 +30,8 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+adapter:
+  sqs:
+    region: "us-east-1"
+    queueUrl: "http://localhost:4566/000000000000/register-bootcamp"
+    endpoint: "http://localhost:4566"

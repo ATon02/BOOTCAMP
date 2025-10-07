@@ -138,9 +138,8 @@ public class Handler {
                 .onErrorMap(NumberFormatException.class,
                     ex -> new BusinessException(BootcampError.INVALID_ID.getMessage()))
                 .flatMap(bootcampUseCase::getBootcampById)
-                .map(bootcampDTOMapper::toResponseDTO)
                 .flatMap(bootcamp -> {
-                    BaseResponse<BootcampResponseDTO> body = BaseResponse.<BootcampResponseDTO>builder()
+                    BaseResponse<BootcampCompletedResponse> body = BaseResponse.<BootcampCompletedResponse>builder()
                             .status(200)
                             .message("Bootcamp found successfully")
                             .path(serverRequest.path())

@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -22,7 +20,7 @@ public class BootcampRequestDTO {
     @NotBlank(message = "Description cannot be blank")
     private String description;
     @NotNull(message = "Start date cannot be null")
-    @PastOrPresent(message = "Start date cannot be in the future")
+    @FutureOrPresent(message = "Start date cannot be in the past")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate  startDate;
     @NotNull(message = "Duration cannot be null")

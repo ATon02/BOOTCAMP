@@ -22,7 +22,7 @@ public final class ConstRepository {
             "SELECT COUNT(*) FROM bootcamp_capacity WHERE capacity_id = :capacityId";
 
     public static final String FIND_ALL_PAGINATED =
-            "SELECT b.id, b.name, " +
+            "SELECT b.id, b.name,b.description,b.start_date,b.duration_in_days, " +
                     "COUNT(bc.capacity_id) as capacity_count " +
                     "FROM bootcamps b " +
                     "LEFT JOIN bootcamp_capacity bc ON b.id = bc.bootcamp_id " +
